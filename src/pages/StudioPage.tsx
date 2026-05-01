@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkles, ArrowRight, ArrowLeft, Save,
@@ -74,6 +74,14 @@ const selectedPill = {
   color: '#FFFFFF',
 } as const;
 
+function buildConceptNumber(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) % 9000;
+  }
+  return hash + 1000;
+}
+
 export default function StudioPage() {
   const [phase, setPhase]               = useState<'landing' | 'flow' | 'done'>('landing');
   const [currentStep, setCurrentStep]   = useState(0);
@@ -133,6 +141,46 @@ export default function StudioPage() {
     setUploadedFiles((prev) => [...prev, ...files].slice(0, 4));
   };
 
+  const conceptSeed = useMemo(() => {
+    const fileNames = uploadedFiles.map((file) => file.name).join('|');
+    return [
+      designData.goal,
+      designData.garmentType,
+      designData.ageRange,
+      designData.colorPreference.join('|'),
+      designData.fabricPreference,
+      designData.styleMood,
+      designData.occasion,
+      designData.customText,
+      designData.embroideryType,
+      designData.specialNotes,
+      fileNames,
+    ].join('|');
+  }, [designData, uploadedFiles]);
+
+  const conceptNumber = useMemo(() => buildConceptNumber(conceptSeed || 'fabrician-studio'), [conceptSeed]);
+
+  const handleNotifyMe = () => {
+    const storageKey = 'fabrician-studio-priority';
+    const raw = localStorage.getItem(storageKey);
+    let queue: Array<{ conceptNumber: number }> = [];
+
+    if (raw) {
+      try {
+        queue = JSON.parse(raw) as Array<{ conceptNumber: number }>;
+      } catch {
+        queue = [];
+      }
+    }
+
+    if (!queue.some((entry) => entry.conceptNumber === conceptNumber)) {
+      const nextQueue = [{ conceptNumber }, ...queue].slice(0, 100);
+      localStorage.setItem(storageKey, JSON.stringify(nextQueue));
+    }
+
+    toast.success('Priority access request saved. We will notify you at launch.');
+  };
+
   // ── DONE STATE ────────────────────────────────────────────────
   if (phase === 'done') {
     return (
@@ -161,7 +209,7 @@ export default function StudioPage() {
           </div>
 
           <p className="text-[10px] font-bold uppercase mb-3" style={{ color: GOLD, letterSpacing: '0.32em' }}>
-            ✦ Atelier Proposal № {Math.floor(Math.random() * 9000) + 1000} ✦
+            ✦ Atelier Proposal № {conceptNumber} ✦
           </p>
           <h1 className="font-display font-semibold text-white mb-4 leading-[1.05]" style={{ fontSize: 'clamp(2rem,4vw,2.75rem)', letterSpacing: '-0.022em' }}>
             Your concept is{' '}
@@ -683,7 +731,7 @@ export default function StudioPage() {
                               className="text-[10px] font-bold uppercase"
                               style={{ color: 'rgba(248,242,232,0.45)', letterSpacing: '0.22em' }}
                             >
-                              Concept № {Math.floor(Math.random() * 9000) + 1000}
+                              Concept № {conceptNumber}
                             </span>
                           </div>
 
@@ -842,11 +890,11 @@ export default function StudioPage() {
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => toast('Notify me feature coming soon!')}
+                    onClick={handleNotifyMe}
                     className="rounded-2xl border-white/20 text-white hover:bg-white/8"
                   >
                     <Bell className="mr-2 w-4 h-4" />
-                    Notify Me
+                    Join Priority List
                   </Button>
                   <Button
                     onClick={handleSubmit}

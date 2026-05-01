@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, signup } = useAuth();
+  const showDemoCredentials = import.meta.env.DEV;
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,7 @@ export default function LoginPage() {
       if (isLogin) {
         const success = login(formData.email, formData.password);
         if (success) { toast.success('Welcome back!'); navigate('/'); }
-        else toast.error('Invalid credentials. Try demo@fabrician.com / demo123');
+        else toast.error(showDemoCredentials ? 'Invalid credentials. Try demo@fabrician.com / demo123' : 'Invalid email or password.');
       } else {
         const success = signup(formData.name, formData.email, formData.phone, formData.password);
         if (success) { toast.success('Account created! Welcome to Fabrician.'); navigate('/'); }
@@ -169,11 +170,13 @@ export default function LoginPage() {
             </AnimatePresence>
 
             {/* Demo credentials */}
-            <div className="mt-6 p-3 rounded-xl bg-muted/60 text-xs text-muted-foreground text-center space-y-0.5">
-              <p className="font-semibold text-foreground text-[11px] uppercase tracking-wide mb-1">Demo Credentials</p>
-              <p>Customer: demo@fabrician.com / demo123</p>
-              <p>Admin: admin@fabrician.com / admin123</p>
-            </div>
+            {showDemoCredentials && (
+              <div className="mt-6 p-3 rounded-xl bg-muted/60 text-xs text-muted-foreground text-center space-y-0.5">
+                <p className="font-semibold text-foreground text-[11px] uppercase tracking-wide mb-1">Demo Credentials</p>
+                <p>Customer: demo@fabrician.com / demo123</p>
+                <p>Admin: admin@fabrician.com / admin123</p>
+              </div>
+            )}
 
             {/* Shop link */}
             <div className="mt-4 text-center">

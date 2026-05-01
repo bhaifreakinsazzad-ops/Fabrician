@@ -38,27 +38,25 @@ const HEADER_WORLDS = [
 ];
 
 export function AppHeader() {
-  const [scrolled, setScrolled]     = useState(false);
-  const [menuOpen, setMenuOpen]     = useState(false);
-  const [worldsOpen, setWorldsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
+  const [worldsOpenAt, setWorldsOpenAt] = useState<string | null>(null);
   const location = useLocation();
   const { items } = useCart();
   const { items: wishItems } = useWishlist();
   const { isAuthenticated } = useAuth();
 
-  const cartCount  = items.reduce((s, i) => s + i.quantity, 0);
-  const onWorld    = location.pathname.startsWith('/worlds/');
+  const routeKey = `${location.pathname}${location.search}`;
+  const menuOpen = menuOpenAt === routeKey;
+  const worldsOpen = worldsOpenAt === routeKey;
+  const cartCount = items.reduce((s, i) => s + i.quantity, 0);
+  const onWorld = location.pathname.startsWith('/worlds/');
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
-
-  useEffect(() => {
-    setMenuOpen(false);
-    setWorldsOpen(false);
-  }, [location.pathname]);
 
   const isActive = (href: string) =>
     location.pathname === href ||
@@ -198,14 +196,14 @@ export function AppHeader() {
                   );
                 }
                 return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    onMouseEnter={() => item.label === 'Worlds' && setWorldsOpen(true)}
-                    onMouseLeave={() => item.label === 'Worlds' && setWorldsOpen(false)}
-                    className="relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-black/[0.04]"
-                    style={{ color: active ? INK : INK_MID }}
-                  >
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onMouseEnter={() => item.label === 'Worlds' && setWorldsOpenAt(routeKey)}
+                      onMouseLeave={() => item.label === 'Worlds' && setWorldsOpenAt(null)}
+                      className="relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-black/[0.04]"
+                      style={{ color: active ? INK : INK_MID }}
+                    >
                     {item.label}
                     {active && (
                       <motion.div
@@ -282,7 +280,7 @@ export function AppHeader() {
 
               {/* Mobile hamburger */}
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => setMenuOpenAt((openAt) => (openAt === routeKey ? null : routeKey))}
                 className="lg:hidden p-2 rounded-lg transition-all hover:bg-black/[0.04]"
                 aria-label="Menu"
                 style={{ color: INK_MID }}
@@ -355,8 +353,8 @@ export function AppHeader() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.18 }}
-              onMouseEnter={() => setWorldsOpen(true)}
-              onMouseLeave={() => setWorldsOpen(false)}
+              onMouseEnter={() => setWorldsOpenAt(routeKey)}
+              onMouseLeave={() => setWorldsOpenAt(null)}
               className="hidden lg:block absolute left-0 right-0 top-full"
               style={{
                 backgroundColor: 'rgba(250,240,227,0.98)',

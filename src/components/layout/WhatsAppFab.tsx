@@ -31,9 +31,11 @@ function buildMessage(pathname: string, cartCount: number): { quick: string; hel
 
 export function WhatsAppFab() {
   const location = useLocation();
+  const routeKey = `${location.pathname}${location.search}`;
   const cartCount = useCart((s) => s.getItemCount());
-  const [open, setOpen] = useState(false);
+  const [openAt, setOpenAt] = useState<string | null>(null);
   const [shown, setShown] = useState(false);
+  const open = openAt === routeKey;
 
   // Hide on admin pages and during checkout success
   const hidden =
@@ -45,9 +47,6 @@ export function WhatsAppFab() {
     const t = setTimeout(() => setShown(true), 1000);
     return () => clearTimeout(t);
   }, []);
-
-  // Auto-close panel on route change
-  useEffect(() => { setOpen(false); }, [location.pathname]);
 
   if (hidden) return null;
 
@@ -64,7 +63,7 @@ export function WhatsAppFab() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={() => setOpenAt(null)}
               className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm"
             />
             {/* Panel */}
@@ -97,7 +96,7 @@ export function WhatsAppFab() {
                     </div>
                   </div>
                   <button
-                    onClick={() => setOpen(false)}
+                    onClick={() => setOpenAt(null)}
                     className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 transition-all flex items-center justify-center"
                     aria-label="Close"
                   >
@@ -181,7 +180,7 @@ export function WhatsAppFab() {
       <AnimatePresence>
         {shown && (
           <motion.button
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpenAt((activeAt) => (activeAt === routeKey ? null : routeKey))}
             initial={{ scale: 0, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0, opacity: 0 }}

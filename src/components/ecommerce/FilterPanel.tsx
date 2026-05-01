@@ -35,7 +35,7 @@ export function FilterPanel({ filters, onFilterChange, className }: FilterPanelP
 
   const activeCount = filters.categories.length + filters.sizes.length + filters.colors.length + (filters.priceRange ? 1 : 0);
 
-  const FilterContent = () => (
+  const filterContent = (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -138,7 +138,7 @@ export function FilterPanel({ filters, onFilterChange, className }: FilterPanelP
     <>
       {/* Desktop Sidebar */}
       <div className={cn('hidden lg:block w-64 flex-shrink-0', className)}>
-        <FilterContent />
+        {filterContent}
       </div>
 
       {/* Mobile Sheet */}
@@ -163,7 +163,7 @@ export function FilterPanel({ filters, onFilterChange, className }: FilterPanelP
               <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
             <div className="mt-4">
-              <FilterContent />
+              {filterContent}
             </div>
           </SheetContent>
         </Sheet>

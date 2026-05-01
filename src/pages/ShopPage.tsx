@@ -104,7 +104,7 @@ export default function ShopPage() {
       result = result.filter((p) => p.collection.includes(collectionParam));
     }
     if (worldParam) {
-      result = result.filter((p) => (p as any).world === worldParam);
+      result = result.filter((p) => p.world === worldParam);
     }
     if (filters.categories.length > 0) {
       result = result.filter((p) => filters.categories.includes(p.category));

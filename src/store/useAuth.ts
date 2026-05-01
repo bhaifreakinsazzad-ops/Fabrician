@@ -12,6 +12,40 @@ interface AuthState {
   updateUser: (updates: Partial<User>) => void;
 }
 
+type StoredUser = User & { password: string };
+
+function getStoredUsers(): StoredUser[] {
+  const raw = localStorage.getItem('fabrician-users');
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as Array<User | StoredUser>;
+    return parsed.map((u) => ({
+      ...u,
+      password: 'password' in u && typeof u.password === 'string' ? u.password : '',
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredUsers(users: StoredUser[]) {
+  localStorage.setItem('fabrician-users', JSON.stringify(users));
+}
+
+function toSessionUser(storedUser: StoredUser): User {
+  // Keep password out of auth session state.
+  return {
+    id: storedUser.id,
+    name: storedUser.name,
+    email: storedUser.email,
+    phone: storedUser.phone,
+    avatar: storedUser.avatar,
+    role: storedUser.role,
+    addresses: storedUser.addresses,
+  };
+}
+
 export const useAuth = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -20,13 +54,20 @@ export const useAuth = create<AuthState>()(
       isAdmin: false,
 
       login: (email, password) => {
-        const stored = localStorage.getItem('fabrician-users');
-        const users = stored ? JSON.parse(stored) : [];
-        const user = users.find((u: User) => u.email === email);
-        if (user) {
-          set({ user, isAuthenticated: true, isAdmin: user.role === 'admin' });
+        const normalizedEmail = email.trim().toLowerCase();
+        const users = getStoredUsers();
+        const storedUser = users.find((u) => u.email.toLowerCase() === normalizedEmail);
+
+        if (storedUser && storedUser.password === password) {
+          const sessionUser = toSessionUser(storedUser);
+          set({
+            user: sessionUser,
+            isAuthenticated: true,
+            isAdmin: sessionUser.role === 'admin',
+          });
           return true;
         }
+
         // Demo login
         if (email === 'demo@fabrician.com' && password === 'demo123') {
           const demoUser: User = {
@@ -52,6 +93,7 @@ export const useAuth = create<AuthState>()(
           set({ user: demoUser, isAuthenticated: true, isAdmin: false });
           return true;
         }
+
         // Admin login
         if (email === 'admin@fabrician.com' && password === 'admin123') {
           const adminUser: User = {
@@ -65,25 +107,28 @@ export const useAuth = create<AuthState>()(
           set({ user: adminUser, isAuthenticated: true, isAdmin: true });
           return true;
         }
+
         return false;
       },
 
-      signup: (name, email, phone, _password) => {
-        const stored = localStorage.getItem('fabrician-users');
-        const users = stored ? JSON.parse(stored) : [];
-        if (users.find((u: User) => u.email === email)) return false;
-        
-        const newUser: User = {
+      signup: (name, email, phone, password) => {
+        const normalizedEmail = email.trim().toLowerCase();
+        const users = getStoredUsers();
+        if (users.find((u) => u.email.toLowerCase() === normalizedEmail)) return false;
+
+        const newUser: StoredUser = {
           id: `u${Date.now()}`,
-          name,
-          email,
-          phone,
+          name: name.trim(),
+          email: normalizedEmail,
+          phone: phone.trim(),
           role: 'customer',
           addresses: [],
+          password,
         };
-        users.push(newUser);
-        localStorage.setItem('fabrician-users', JSON.stringify(users));
-        set({ user: newUser, isAuthenticated: true, isAdmin: false });
+
+        const nextUsers = [...users, newUser];
+        saveStoredUsers(nextUsers);
+        set({ user: toSessionUser(newUser), isAuthenticated: true, isAdmin: false });
         return true;
       },
 
@@ -94,8 +139,14 @@ export const useAuth = create<AuthState>()(
       updateUser: (updates) => {
         const { user } = get();
         if (!user) return;
-        const updated = { ...user, ...updates };
-        set({ user: updated });
+
+        const updatedUser: User = { ...user, ...updates };
+        const users = getStoredUsers();
+        const nextUsers = users.map((stored) =>
+          stored.id === user.id ? { ...stored, ...updatedUser } : stored
+        );
+        saveStoredUsers(nextUsers);
+        set({ user: updatedUser });
       },
     }),
     {

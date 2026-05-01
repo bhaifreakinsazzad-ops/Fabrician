@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { ProductCard } from '@/components/ecommerce/ProductCard';
 import { WorldCard } from '@/components/ecommerce/WorldCard';
 import { getWorldBySlug, worlds } from '@/data/worlds';
-import { getProductsByWorld } from '@/data/products';
+import { getNewInProducts, getProductsByWorld } from '@/data/products';
 
 export default function WorldDetailPage() {
   const { worldSlug } = useParams<{ worldSlug: string }>();
@@ -13,6 +13,7 @@ export default function WorldDetailPage() {
   if (!world) return <Navigate to="/worlds" replace />;
 
   const worldProducts = getProductsByWorld(world.slug);
+  const recommendedProducts = getNewInProducts().filter((product) => product.world !== world.slug).slice(0, 4);
   const relatedWorlds = worlds.filter((w) => w.slug !== world.slug).slice(0, 4);
 
   return (
@@ -167,17 +168,34 @@ export default function WorldDetailPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16" style={{ color: '#69707D' }}>
-              <div className="text-5xl mb-4">{world.emoji}</div>
-              <p className="font-display font-medium text-lg mb-2" style={{ color: '#202432' }}>Coming soon</p>
-              <p className="text-sm">New pieces for {world.name} are on their way.</p>
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold mt-6 transition-all hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #C8A57A 0%, #B8924A 100%)', color: '#FFFFFF' }}
-              >
-                Browse all products
-              </Link>
+            <div className="space-y-8">
+              <div className="text-center py-6" style={{ color: '#69707D' }}>
+                <div className="text-5xl mb-4">{world.emoji}</div>
+                <p className="font-display font-medium text-lg mb-2" style={{ color: '#202432' }}>This world is being curated</p>
+                <p className="text-sm">Explore fresh arrivals while we prepare this world’s full edit.</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                {recommendedProducts.map((product, i) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.45, delay: i * 0.06 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))}
+              </div>
+              <div className="text-center">
+                <Link
+                  to="/shop"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg, #C8A57A 0%, #B8924A 100%)', color: '#FFFFFF' }}
+                >
+                  Browse all products
+                </Link>
+              </div>
             </div>
           )}
         </div>

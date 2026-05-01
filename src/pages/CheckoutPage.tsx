@@ -88,7 +88,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     const orderNumber = generateOrderId();
-    const orderId     = `order_${Date.now()}`;
+    const orderId = `order_${orderNumber}`;
 
     const notesParts = [
       notesRef.current?.value?.trim(),

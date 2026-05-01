@@ -3,21 +3,39 @@ import { Palette, MessageSquare } from 'lucide-react';
 import { useStudio } from '@/store/useStudio';
 import { getStudioStatusLabel } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import type { StudioSubmission } from '@/types';
 
 const GOLD      = '#C7A36A';
 const GOLD_DEEP = '#9E7E5D';
 const NAVY      = '#141B2C';
 const GOLD_STRIP = 'linear-gradient(90deg, #C8A57A 0%, #D4B896 50%, #B8924A 100%)';
 
-const statusOptions = ['All', 'Submitted', 'Under Review', 'Concept Ready', 'Waitlist', 'Future Eligible', 'Rejected'];
+const STATUS_FILTERS: ReadonlyArray<{ label: string; value: 'all' | StudioSubmission['status'] }> = [
+  { label: 'All', value: 'all' },
+  { label: 'Submitted', value: 'submitted' },
+  { label: 'Under Review', value: 'under_review' },
+  { label: 'Concept Ready', value: 'concept_ready' },
+  { label: 'Waitlist', value: 'waitlist' },
+  { label: 'Future Eligible', value: 'future_eligible' },
+  { label: 'Rejected', value: 'rejected' },
+];
+
+const STATUS_OPTIONS: StudioSubmission['status'][] = [
+  'submitted',
+  'under_review',
+  'concept_ready',
+  'waitlist',
+  'future_eligible',
+  'rejected',
+];
 
 export default function AdminStudio() {
   const { submissions, updateSubmissionStatus } = useStudio();
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState<'all' | StudioSubmission['status']>('all');
 
   const filtered = submissions.filter((s) => {
-    if (statusFilter === 'All') return true;
-    return s.status === statusFilter.toLowerCase().replace(/ /g, '_');
+    if (statusFilter === 'all') return true;
+    return s.status === statusFilter;
   });
 
   return (
@@ -32,12 +50,12 @@ export default function AdminStudio() {
 
       {/* Status filter pills */}
       <div className="flex flex-wrap gap-2">
-        {statusOptions.map((status) => {
-          const isActive = statusFilter === status;
+        {STATUS_FILTERS.map(({ label, value }) => {
+          const isActive = statusFilter === value;
           return (
             <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
+              key={value}
+              onClick={() => setStatusFilter(value)}
               className="px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
               style={isActive
                 ? {
@@ -48,7 +66,7 @@ export default function AdminStudio() {
                 : {}
               }
             >
-              <span className={cn(!isActive && 'text-muted-foreground')}>{status}</span>
+              <span className={cn(!isActive && 'text-muted-foreground')}>{label}</span>
             </button>
           );
         })}
@@ -120,15 +138,14 @@ export default function AdminStudio() {
                   <div className="flex items-center gap-2">
                     <select
                       value={sub.status}
-                      onChange={(e) => updateSubmissionStatus(sub.id, e.target.value as any)}
+                      onChange={(e) => updateSubmissionStatus(sub.id, e.target.value as StudioSubmission['status'])}
                       className="flex-1 text-xs rounded-lg border border-input bg-background px-2 py-1.5"
                     >
-                      <option value="submitted">Submitted</option>
-                      <option value="under_review">Under Review</option>
-                      <option value="concept_ready">Concept Ready</option>
-                      <option value="waitlist">Waitlist</option>
-                      <option value="future_eligible">Future Eligible</option>
-                      <option value="rejected">Rejected</option>
+                      {STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {getStudioStatusLabel(status).label}
+                        </option>
+                      ))}
                     </select>
                     <button className="p-2 rounded-lg hover:bg-muted transition-colors" title="Comment">
                       <MessageSquare className="w-4 h-4" />

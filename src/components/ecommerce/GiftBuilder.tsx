@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Check, ChevronRight, ShoppingCart, X, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -26,6 +26,10 @@ const STEPS = [
   { label: 'Gift',     num: 3 },
   { label: 'Preview',  num: 4 },
 ];
+
+const FOCUS_RING_STYLE = {
+  '--tw-ring-color': 'rgba(184,146,74,0.3)',
+} as CSSProperties & { '--tw-ring-color': string };
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -317,8 +321,7 @@ export function GiftBuilder() {
                   borderColor: '#E8DED2',
                   backgroundColor: '#FFFFFF',
                   color: '#202432',
-                  // @ts-ignore
-                  '--tw-ring-color': 'rgba(184,146,74,0.3)',
+                  ...FOCUS_RING_STYLE,
                 }}
               />
 
@@ -334,15 +337,14 @@ export function GiftBuilder() {
                   rows={3}
                   placeholder="Write something beautiful… e.g. 'For our little miracle, with all our love.'"
                   className="w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
-                  style={{
-                    borderColor: '#E8DED2',
-                    backgroundColor: '#F6F1EA',
-                    color: '#202432',
-                    lineHeight: 1.6,
-                    // @ts-ignore
-                    '--tw-ring-color': 'rgba(184,146,74,0.3)',
-                  }}
-                />
+                style={{
+                  borderColor: '#E8DED2',
+                  backgroundColor: '#F6F1EA',
+                  color: '#202432',
+                  lineHeight: 1.6,
+                  ...FOCUS_RING_STYLE,
+                }}
+              />
                 <span
                   className="absolute bottom-2.5 right-3 text-[10px]"
                   style={{ color: '#9CA3AF' }}
