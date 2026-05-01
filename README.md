@@ -1,80 +1,48 @@
-# Fabrician Store Platform
+# Fabrician — Claude-Ready Restructured Base
 
-Production-ready Next.js 16 storefront for Fabrician with:
+This package restructures the Kimi-generated scaffold into a **Claude Code handoff repo**.
 
-- Landing + full shop browsing flow
-- Product detail pages
-- Persistent cart (browser local storage)
-- Checkout handoff to Stripe Checkout
-- Admin operations page with config readiness checks
-- SEO essentials (`sitemap.xml`, `robots.txt`, metadata)
+## What this is
+A working React/Vite ecommerce scaffold for Fabrician, now paired with a clear product brief so Claude Code can continue development in the right direction.
 
-## Tech Stack
+## What this is not
+This is **not** the final product experience. The current implementation is still too generic and must be rebuilt experience-first.
 
-- Next.js 16 (App Router)
-- React 19
-- Tailwind CSS 4
-- Stripe Node SDK
-- Zod request validation
+## Start here
+1. Read `CLAUDE.md`
+2. Read `docs/FABRICIAN-OBJECTIVE.md`
+3. Read `docs/KEEP-REWRITE-MAP.md`
+4. Read `docs/CLAUDE-CODE-STARTER-PROMPT.md`
 
-## Quick Start
+## Repo intent
+- reuse the scaffold
+- do not trust the current visual direction
+- rebuild the core front-facing experience first
+- keep Fabrician Studio as a trial / preview feature for now
+- keep the ready-stock baby clothing store as the real revenue layer
 
-1. Install dependencies:
+## Existing stack
+- React
+- Vite
+- TypeScript
+- Tailwind
+- shadcn-style UI primitives
+- Zustand stores
+- Framer Motion available
 
-```bash
-npm install
-```
+## Recommended next build order
+1. Home experience reset
+2. Shop and product detail rewrite
+3. Studio rewrite
+4. Cart / checkout refinement
+5. Admin cleanup and controls
 
-2. Copy environment file and set values:
+## Scripts
+- `npm install`
+- `npm run dev`
+- `npm run build`
 
-```bash
-cp .env.example .env.local
-```
-
-3. Run locally:
-
-```bash
-npm run dev
-```
-
-## Required Environment Variables
-
-- `NEXT_PUBLIC_SITE_URL`
-  - Example: `https://your-domain.com`
-- `STRIPE_SECRET_KEY`
-  - Stripe secret key for server-side checkout session creation.
-
-Without `STRIPE_SECRET_KEY`, checkout is blocked intentionally and admin will show "Needs setup".
-
-## Quality Commands
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
-
-## Deploy to Vercel
-
-1. Push this repository to GitHub.
-2. Import the repository into Vercel.
-3. Add env vars in Vercel project settings:
-   - `NEXT_PUBLIC_SITE_URL`
-   - `STRIPE_SECRET_KEY`
-4. Deploy.
-5. Verify:
-   - `/api/health`
-   - `/admin` readiness cards
-   - checkout flow from `/cart` -> `/checkout`
-
-## Core Routes
-
-- `/` - Home
-- `/shop` - Catalog with filters/sort
-- `/product/[slug]` - Product page
-- `/cart` - Cart review
-- `/checkout` - Checkout form + Stripe redirect
-- `/checkout/success` - Payment success
-- `/admin` - Store/admin checks
-- `/api/checkout` - Stripe session creation
-- `/api/health` - Basic runtime health
+## Notes
+- `src/pages/HomePage.tsx` is currently generic and should be rewritten.
+- `src/pages/StudioPage.tsx` is currently usable as a logic reference only.
+- `src/pages/Home.tsx` appears redundant and can likely be removed during cleanup.
